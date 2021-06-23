@@ -2,7 +2,7 @@ import json
 import numpy as np
 import time
 import os
-from constants import righthand_skeleton, righth_kps
+from constants import FREIHAND_SKELETON, FREIHAND_KPS
 
 def _assert_exist(p):
     msg = 'File does not exists: %s' % p
@@ -111,9 +111,9 @@ def main():
     
     new_data["categories"] = [{"name":'hand',
                                  "id":1,
-                                 "skeleton":list(righthand_skeleton),
+                                 "skeleton":list(FREIHAND_SKELETON),
                                  "supercategory":'hand',
-                                 "keypoints":list(righth_kps)}]
+                                 "keypoints":list(FREIHAND_KPS)}]
     new_data["images"] = []
     new_data["annotations"] = []
 
@@ -141,6 +141,7 @@ def main():
                 im_name = get_img_path(idx, base_path, folder_type, version)
                 
                 uv = np.hstack((uv, 2 * np.ones((uv.shape[0], 1))))
+                uv = np.vstack((uv, np.zeros((uv.shape[0], 3))))
                 kps = np.array(uv, dtype = np.int).flatten().tolist()
                 
                 # Only one hand per image, so the number of hands = number of images

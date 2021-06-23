@@ -13,6 +13,11 @@ righthand_skeleton = np.array([
     (113, 130)] + [(x, x + 1) for s in [114, 118, 122, 126, 130] for x in range(s, s + 3)]) - 112
 righthand_skeleton = righthand_skeleton.tolist()
 
+lefthand_skeleton = np.array([
+    (92, 93), (92, 97), (92, 101), (92, 105),  # connect to finger starts
+    (92, 109)] + [(x, x + 1) for s in [93, 97, 101, 105, 109] for x in range(s, s + 3)]) - 70
+lefthand_skeleton = lefthand_skeleton.tolist()
+
 lefthand_pose = np.array([
     [-1.75, 3.9, 2.0],  # 92
     [-1.65, 3.8, 2.0],  # 93
@@ -46,12 +51,68 @@ righthand = [0.029, 0.022, 0.035, 0.037, 0.047, 0.026, 0.025,
              0.024, 0.035, 0.018, 0.024, 0.022, 0.026, 0.017,
              0.021, 0.021, 0.032, 0.02, 0.019, 0.022, 0.031]
 
+lefthand = [0.029, 0.022, 0.035, 0.037, 0.047, 0.026, 0.025,
+            0.024, 0.035, 0.018, 0.024, 0.022, 0.026, 0.017,
+            0.021, 0.021, 0.032, 0.02, 0.019, 0.022, 0.031]
 
 righth_kps = ['rh_' + str(x) for x in range(0, 21)]
+lefth_kps = ['lh_' + str(x) for x in range(21, 42)]
+
+HFLIP = {
+    'lh_21': 'rh_0',
+    'rh_0': 'lh_21',
+    'lh_22': 'rh_1',
+    'rh_1': 'lh_22',
+    'lh_23': 'rh_2',
+    'rh_2': 'lh_23',
+    'lh_24': 'rh_3',
+    'rh_3': 'lh_24',
+    'lh_25': 'rh_4',
+    'rh_4': 'lh_25',
+    'lh_26': 'rh_5',
+    'rh_5': 'lh_26',
+    'lh_27': 'rh_6',
+    'rh_6': 'lh_27',
+    'lh_28': 'rh_7',
+    'rh_7': 'lh_28',
+    'lh_29': 'rh_8',
+    'rh_8': 'lh_29',
+    'lh_30': 'rh_9',
+    'rh_9': 'lh_30',
+    'lh_31': 'rh_10',
+    'rh_10': 'lh_31',
+    'lh_32': 'rh_11',
+    'rh_11': 'lh_32',
+    'lh_33': 'rh_12',
+    'rh_12': 'lh_33',
+    'lh_34': 'rh_13',
+    'rh_13': 'lh_34',
+    'lh_35': 'rh_14',
+    'rh_14': 'lh_35',
+    'lh_36': 'rh_15',
+    'rh_15': 'lh_36',
+    'lh_37': 'rh_16',
+    'rh_16': 'lh_37',
+    'lh_38': 'rh_17',
+    'rh_17': 'lh_38',
+    'lh_39': 'rh_18',
+    'rh_18': 'lh_39',
+    'lh_40': 'rh_19',
+    'rh_19': 'lh_40',
+    'lh_41': 'rh_20',
+    'rh_20': 'lh_41'
+}
 
 FREIHAND_CATEGORIES = "hand"
 
-FREIHAND_SCORE_WEIGHTS = [100.0] * 3 + [1.0] * (len(righth_kps) - 3)
+RIGHTHAND_SCORE_WEIGHTS = [100.0] * 3 + [1.0] * (len(righth_kps) - 3)
+
+FREIHAND_SCORE_WEIGHTS = [100.0] * 3 + [1.0] * (len(righth_kps) - 3) + [0.0] * len(righth_kps)
+FREIHAND_SKELETON = righthand_skeleton + lefthand_skeleton
+FREIHAND_POSE = np.vstack((righthand_pose, lefthand_pose))
+FREIHAND_KPS = righth_kps + lefth_kps
+FREIHAND_SIGMAS = righthand + lefthand
+
 
 def draw_ann(ann, *, keypoint_painter, filename=None, margin=0.5, aspect=None, **kwargs):
     from openpifpaf import show  # pylint: disable=import-outside-toplevel

@@ -5,8 +5,8 @@ import openpifpaf
 from openpifpaf.plugins.coco import CocoDataset as Coco
 #from .wholebody_metric import WholebodyMetric
 from .constants import (
-    righthand_skeleton, righthand_pose, FREIHAND_SCORE_WEIGHTS, righth_kps, righthand,
-    FREIHAND_CATEGORIES
+    FREIHAND_SKELETON, FREIHAND_POSE, FREIHAND_SCORE_WEIGHTS, FREIHAND_KPS, FREIHAND_SIGMAS,
+    FREIHAND_CATEGORIES, HFLIP
     )
 
 try:
@@ -44,16 +44,16 @@ class Freihand(openpifpaf.datasets.DataModule):
     def __init__(self):
         super().__init__()
         cif = openpifpaf.headmeta.Cif('cif', 'freihand',
-                                      keypoints=righth_kps,
-                                      sigmas=righthand,
-                                      pose=righthand_pose,
-                                      draw_skeleton=righthand_skeleton,
+                                      keypoints=FREIHAND_KPS,
+                                      sigmas=FREIHAND_SIGMAS,
+                                      pose=FREIHAND_POSE,
+                                      draw_skeleton=FREIHAND_SKELETON,
                                       score_weights=FREIHAND_SCORE_WEIGHTS)
         caf = openpifpaf.headmeta.Caf('caf', 'freihand',
-                                      keypoints=righth_kps,
-                                      sigmas=righthand,
-                                      pose=righthand_pose,
-                                      skeleton=righthand_skeleton,)
+                                      keypoints=FREIHAND_KPS,
+                                      sigmas=FREIHAND_SIGMAS,
+                                      pose=FREIHAND_POSE,
+                                      skeleton=FREIHAND_SKELETON,)
 
         cif.upsample_stride = self.upsample_stride
         caf.upsample_stride = self.upsample_stride
@@ -181,8 +181,8 @@ class Freihand(openpifpaf.datasets.DataModule):
 
         return openpifpaf.transforms.Compose([
             openpifpaf.transforms.NormalizeAnnotations(),
-            # openpifpaf.transforms.RandomApply(
-            #     openpifpaf.transforms.HFlip(WHOLEBODY_KEYPOINTS, HFLIP), 0.5),
+            openpifpaf.transforms.RandomApply(
+                openpifpaf.transforms.HFlip(FREIHAND_KPS, HFLIP), 0.5),
             rescale_t,
             openpifpaf.transforms.RandomApply(
                 openpifpaf.transforms.Blur(), self.blur),
