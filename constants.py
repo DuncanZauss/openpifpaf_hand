@@ -10,12 +10,16 @@ import copy
 
 righthand_skeleton = np.array([
     (113, 114), (113, 118), (113, 122), (113, 126),   # connect to finger starts
-    (113, 130)] + [(x, x + 1) for s in [114, 118, 122, 126, 130] for x in range(s, s + 3)]) - 112
+    (113, 130)] + [(x, x + 1) for s in [114, 118, 122, 126, 130] for x in range(s, s + 3)]
+    + [(115, 118), (118, 122), (122, 126), (126, 130)]
+    ) - 112
 righthand_skeleton = righthand_skeleton.tolist()
 
 lefthand_skeleton = np.array([
     (92, 93), (92, 97), (92, 101), (92, 105),  # connect to finger starts
-    (92, 109)] + [(x, x + 1) for s in [93, 97, 101, 105, 109] for x in range(s, s + 3)]) - 70
+    (92, 109)] + [(x, x + 1) for s in [93, 97, 101, 105, 109] for x in range(s, s + 3)]
+    + [(94, 97), (97, 101), (101, 105), (105, 109)]
+    ) - 70
 lefthand_skeleton = lefthand_skeleton.tolist()
 
 lefthand_pose = np.array([
@@ -136,31 +140,29 @@ def draw_ann(ann, *, keypoint_painter, filename=None, margin=0.5, aspect=None, *
         keypoint_painter.annotation(ax, ann)
 
 
-# =============================================================================
-# def draw_skeletons(pose, prefix=""):
-#     from openpifpaf.annotation import Annotation  # pylint: disable=import-outside-toplevel
-#     from openpifpaf import show  # pylint: disable=import-outside-toplevel
-# 
-#     scale = np.sqrt(
-#         (np.max(pose[:, 0]) - np.min(pose[:, 0]))
-#         * (np.max(pose[:, 1]) - np.min(pose[:, 1]))
-#     )
-# 
-#     show.KeypointPainter.show_joint_scales = True
-#     keypoint_painter = show.KeypointPainter(line_width=2)
-# 
-#     ann = Annotation(keypoints=WHOLEBODY_KEYPOINTS,
-#                      skeleton=WHOLEBODY_SKELETON,
-#                      score_weights=WHOLEBODY_SCORE_WEIGHTS)
-#     ann.set(pose, np.array(WHOLEBODY_SIGMAS) * scale)
-#     draw_ann(ann, filename='./docs/' + prefix + 'skeleton_wholebody.png',
-#              keypoint_painter=keypoint_painter)
-# 
-# 
-# def print_associations():
-#     for j1, j2 in WHOLEBODY_SKELETON:
-#         print(WHOLEBODY_KEYPOINTS[j1 - 1], '-', WHOLEBODY_KEYPOINTS[j2 - 1])
-# =============================================================================
+def draw_skeletons(pose, prefix=""):
+    from openpifpaf.annotation import Annotation  # pylint: disable=import-outside-toplevel
+    from openpifpaf import show  # pylint: disable=import-outside-toplevel
+
+    scale = np.sqrt(
+        (np.max(pose[:, 0]) - np.min(pose[:, 0]))
+        * (np.max(pose[:, 1]) - np.min(pose[:, 1]))
+    )
+
+    show.KeypointPainter.show_joint_scales = True
+    keypoint_painter = show.KeypointPainter(line_width=2)
+
+    ann = Annotation(keypoints=FREIHAND_KPS,
+                     skeleton=FREIHAND_SKELETON,
+                     score_weights=FREIHAND_SCORE_WEIGHTS)
+    ann.set(pose, np.array(FREIHAND_SIGMAS) * scale)
+    draw_ann(ann, filename='./docs/' + prefix + 'skeleton_FREIHAND.png',
+             keypoint_painter=keypoint_painter)
+
+
+def print_associations():
+    for j1, j2 in FREIHAND_SKELETON:
+        print(FREIHAND_KPS[j1 - 1], '-', FREIHAND_KPS[j2 - 1])
 
 
 def rotate(pose, angle=45, axis=2):
@@ -188,6 +190,5 @@ def rotate(pose, angle=45, axis=2):
 
 
 if __name__ == '__main__':
-    pass
-    # print_associations()
-    # draw_skeletons(WHOLEBODY_STANDING_POSE)
+    print_associations()
+    draw_skeletons(FREIHAND_POSE)
