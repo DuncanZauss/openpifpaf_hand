@@ -96,7 +96,7 @@ def main():
     # List of all the annotation types that should be used
    
     base_path = "../FreiHand"
-    new_file = "../FreiHand/FreiHand_Train_annotations_MSCOCO_style.json"
+    new_file = "../FreiHand/FreiHand_only_homogenized_Train_annotations_MSCOCO_style.json"
 
     # =============================================================================
     # orig_file = "../../data-mscoco/annotations_wholebody/coco_wholebody_val_v1.0.json"
@@ -122,7 +122,7 @@ def main():
         db_data_anno = load_db_annotation(base_path, folder_type)
     
         # iterate over all samples
-        for version in ["gs", "hom", "sample", "auto"]:
+        for version in ["hom"]: #["gs", "hom", "sample", "auto"]:
             for idx in range(db_size(folder_type)):
                 # annotation for this frame
                 im_size = (224, 224)
