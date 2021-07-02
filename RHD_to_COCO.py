@@ -9,21 +9,22 @@ from constants import FREIHAND_SKELETON, FREIHAND_KPS
 
 def main():
     base_path = "../Rendered_Hand_Dataset"            
-    new_data = {}
-    new_data["info"] = dict(url="https://github.com/openpifpaf/openpifpaf",
-        date_created=time.strftime("%a, %d %b %Y %H:%M:%S +0000",
-                                   time.localtime()),
-        description=("Conversion of RHD dataset into MS-COCO"))
-    
-    new_data["categories"] = [{"name":'hand',
-                                 "id":1,
-                                 "skeleton":list(FREIHAND_SKELETON),
-                                 "supercategory":'hand',
-                                 "keypoints":list(FREIHAND_KPS)}]
-    new_data["images"] = []
-    new_data["annotations"] = []
 
     for set in ['training', 'evaluation']:
+        new_data = {}
+        new_data["info"] = dict(url="https://github.com/openpifpaf/openpifpaf",
+            date_created=time.strftime("%a, %d %b %Y %H:%M:%S +0000",
+                                       time.localtime()),
+            description=("Conversion of RHD dataset into MS-COCO"))
+        
+        new_data["categories"] = [{"name":'hand',
+                                     "id":1,
+                                     "skeleton":list(FREIHAND_SKELETON),
+                                     "supercategory":'hand',
+                                     "keypoints":list(FREIHAND_KPS)}]
+        new_data["images"] = []
+        new_data["annotations"] = []
+        
         new_file = "../Rendered_Hand_Dataset/RHD_" + set + "_annotations_MSCOCO_style.json"
 
         # load annotations of this set
