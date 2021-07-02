@@ -35,6 +35,7 @@ class Freihand(openpifpaf.datasets.DataModule):
     upsample_stride = 1
     min_kp_anns = 1
     bmin = 1.0
+    train_only_cif = False
 
     eval_annotation_filter = True
     eval_long_edge = 641
@@ -57,7 +58,7 @@ class Freihand(openpifpaf.datasets.DataModule):
 
         cif.upsample_stride = self.upsample_stride
         caf.upsample_stride = self.upsample_stride
-        self.head_metas = [cif, caf]
+        self.head_metas = [cif] if self.train_only_cif else [cif, caf]
 
     @classmethod
     def cli(cls, parser: argparse.ArgumentParser):
@@ -102,10 +103,10 @@ class Freihand(openpifpaf.datasets.DataModule):
         group.add_argument('--freihand-bmin',
                            default=cls.bmin, type=float,
                            help='bmin')
-        group.add_argument('--freihand-apply-local-centrality-weights',
-                           dest='freihand_apply_local_centrality',
+        group.add_argument('--freihand-train-only-cif-heads',
+                           dest='freihand_train_only_cif_heads',
                            default=False, action='store_true',
-                           help='Weigh the CIF and CAF head during training.')
+                           help='Train only a CIF head, which can be used for the CifOnly decoder.')
 
         # evaluation
         eval_set_group = group.add_mutually_exclusive_group()
@@ -147,6 +148,7 @@ class Freihand(openpifpaf.datasets.DataModule):
         cls.upsample_stride = args.freihand_upsample
         cls.min_kp_anns = args.freihand_min_kp_anns
         cls.bmin = args.freihand_bmin
+        cls.train_only_cif = args.freihand_train_only_cif_heads
 
         # evaluation
         cls.eval_annotation_filter = args.freihand_eval_annotation_filter
@@ -156,8 +158,11 @@ class Freihand(openpifpaf.datasets.DataModule):
 
 
     def _preprocess(self):
-        encoders = (openpifpaf.encoder.Cif(self.head_metas[0], bmin=self.bmin),
-                    openpifpaf.encoder.Caf(self.head_metas[1], bmin=self.bmin))
+        if self.train_only_cif:
+            encoders = [openpifpaf.encoder.Cif(self.head_metas[0], bmin=self.bmin)]
+        else:
+            encoders = (openpifpaf.encoder.Cif(self.head_metas[0], bmin=self.bmin),
+                        openpifpaf.encoder.Caf(self.head_metas[1], bmin=self.bmin))
 
         if not self.augmentation:
             return openpifpaf.transforms.Compose([
@@ -265,7 +270,7 @@ class Freihand(openpifpaf.datasets.DataModule):
                 openpifpaf.transforms.ToKpAnnotations(
                     FREIHAND_CATEGORIES,
                     keypoints_by_category={1: self.head_metas[0].keypoints},
-                    skeleton_by_category={1: self.head_metas[1].skeleton},
+                    skeleton_by_category={1: self.head_metas[0].draw_skeleton},
                 ),
                 openpifpaf.transforms.ToCrowdAnnotations(FREIHAND_CATEGORIES),
             ]),
