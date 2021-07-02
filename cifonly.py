@@ -19,13 +19,11 @@ LOG = logging.getLogger(__name__)
 
 
 class CifOnly(Decoder):
-    """Generate CifCaf poses from fields.
-
-    :param: nms: set to None to switch off non-maximum suppression.
+    """Generate CifOnly poses from fields.
     """
-    occupancy_visualizer = visualizer.Occupancy()
     force_complete = False
     keypoint_threshold = 0.15
+    downsample_factor = 16
 
     def __init__(self,
                  cif_metas: List[headmeta.Cif],
@@ -58,7 +56,14 @@ class CifOnly(Decoder):
         group.add_argument('--cifonly-keypoint-threshold', type=float,
                            default=cls.keypoint_threshold,
                            help='filter keypoints by score')
-    
+        group.add_argument('--cifonly-without-highres',
+                           default=False, action='store_true',
+                           help="Create highres confidence maps and search for maxima in those")
+        group.add_argument('--cifonly-downsample-factor', type=float,
+                           default=cls.downsample_factor,
+                           help='Ratio of the image to the output feature map size.')
+        
+        
     @classmethod
     def configure(cls, args: argparse.Namespace):
         """Take the parsed argument parser output and configure class variables."""
@@ -67,6 +72,8 @@ class CifOnly(Decoder):
             LOG.warn("Force complete pose is not recommended for the CifOnly decoder, " \
                      "it will force a prediction for any given image")
             cls.keypoint_threshold = 0.0
+        cls.downsample_factor = args.cifonly_downsample_factor
+        cls.without_highres = args.cifonly_without_highres
                  
     @classmethod
     def factory(cls, head_metas):
@@ -80,29 +87,28 @@ class CifOnly(Decoder):
         start = time.perf_counter()
         for vis, meta in zip(self.cif_visualizers, self.cif_metas):
             vis.predicted(fields[meta.head_index])
-        cifhr = utils.CifHr().fill(fields, self.cif_metas)
         ann = Annotation(self.keypoints,
                           self.out_skeleton,
                           score_weights=self.score_weights)
-        for f, hr_map in enumerate(cifhr.accumulated):
-            y, x = np.unravel_index(hr_map.argmax(), hr_map.shape)
-            v = np.max(hr_map)
-            if v > self.keypoint_threshold:
-                ann.add(f, (x, y, v)) 
-                #ann.joint_scales[f] = 0.1 #s
-# =============================================================================
-#         hr_maps_stacked = np.array(cifhr.accumulated)
-#         hr_shape = hr_maps_stacked.shape
-#         coords = hr_maps_stacked.reshape((hr_shape[0], hr_shape[1] * hr_shape[2])).argmax(axis=1)
-#         x_coords = coords % hr_shape[1]
-#         y_coords = coords / hr_shape[2]
-#         v_l = hr_maps_stacked.max(axis=(1,2))
-#         for f, (x, y, v) in enumerate(zip(x_coords, y_coords, v_l)):
-#             #print(f, len(x), len(y), len(v))
-#             if v > self.keypoint_threshold:
-#                 ann.add(f, (x, y, v)) 
-#                 #ann.joint_scales[f] = 0.1 #s
-# =============================================================================
+        if not self.without_highres:
+            # Slower decoder with proper high resolution maps
+            cifhr = utils.CifHr().fill(fields, self.cif_metas)
+            for f, hr_map in enumerate(cifhr.accumulated):
+                y, x = np.unravel_index(hr_map.argmax(), hr_map.shape)
+                v = np.max(hr_map)
+                if v > self.keypoint_threshold:
+                    ann.add(f, (x, y, v))
+        else:
+            # Slightly faster without high res maps
+            cif_fields = fields[0]
+            for f in range(cif_fields.shape[0]):
+                kp_f = cif_fields[f , :, :]
+                ind_i, ind_j = np.unravel_index(kp_f[1, :, :].argmax(), kp_f[1, :, :].shape)
+                v = np.max(kp_f[1, :, :])
+                x = kp_f[2, ind_i, ind_j] * self.downsample_factor  # TODO replace by stride/upsample 
+                y = kp_f[3, ind_i, ind_j] * self.downsample_factor
+                if v > self.keypoint_threshold:
+                     ann.add(f, (x, y, v))
         annotations = [ann]
         LOG.debug('annotations %d, %.3fs', len(annotations), time.perf_counter() - start)
         LOG.info('%d annotations: %s', len(annotations),
