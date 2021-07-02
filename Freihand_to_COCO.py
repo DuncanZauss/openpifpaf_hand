@@ -152,7 +152,7 @@ def main():
                     'id': int(im_name[:-4]),  # only one hand per image --> im_id=id, no need for unique treatment of different hands
                     'area': int(box[2] * box[3]),
                     'bbox': list(box),
-                    'num_keypoints': 21,
+                    'num_keypoints': 42,
                     'keypoints': kps,
                     'segmentation': []})
                 
