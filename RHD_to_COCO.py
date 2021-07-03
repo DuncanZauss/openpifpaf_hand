@@ -10,7 +10,14 @@ from constants import FREIHAND_SKELETON, FREIHAND_KPS
 def main():
     base_path = "../Rendered_Hand_Dataset"            
 
-    for set in ['training', 'evaluation']:
+    rhd_to_freihand_kp_matching = [21, 25, 24, 23, 22, 29, 28, 27, 26, 33, 32, 31, 30, # left hand
+                                   37, 36, 35, 34, 41, 40, 39, 38, 
+                                   0, 4, 3, 2, 1, 8, 7, 6, 5, 12, 11, 10, 9, #Right hand
+                                   16, 15, 14, 13, 20, 19, 18, 17]
+    assert len(rhd_to_freihand_kp_matching) == 42
+    assert len(set(rhd_to_freihand_kp_matching)) == 42
+
+    for d_set in ['training', 'evaluation']:
         new_data = {}
         new_data["info"] = dict(url="https://github.com/openpifpaf/openpifpaf",
             date_created=time.strftime("%a, %d %b %Y %H:%M:%S +0000",
@@ -25,10 +32,10 @@ def main():
         new_data["images"] = []
         new_data["annotations"] = []
         
-        new_file = "../Rendered_Hand_Dataset/RHD_" + set + "_annotations_MSCOCO_style.json"
+        new_file = "../Rendered_Hand_Dataset/RHD_" + d_set + "_annotations_MSCOCO_style.json"
 
         # load annotations of this set
-        with open(os.path.join(base_path, set, 'anno_%s.pickle' % set), 'rb') as fi:
+        with open(os.path.join(base_path, d_set, 'anno_%s.pickle' % d_set), 'rb') as fi:
             anno_all = pickle.load(fi)
         
         # iterate samples of the set
@@ -38,6 +45,7 @@ def main():
             
             # get info from annotation dictionary
             uv = anno['uv_vis']
+            uv = uv[rhd_to_freihand_kp_matching]
             for jj in range(uv.shape[0]):
                 if uv[jj, 2]==0:
                     uv[jj, 0]=0
