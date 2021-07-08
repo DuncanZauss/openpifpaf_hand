@@ -289,4 +289,9 @@ class RHD(openpifpaf.datasets.DataModule):
             collate_fn=openpifpaf.datasets.collate_images_anns_meta)
 
     def metrics(self):
-        return []
+        return [openpifpaf.metric.Coco(
+            pycocotools.coco.COCO(self.eval_annotations),
+            max_per_image=20,
+            category_ids=[1],
+            iou_type='keypoints',
+        )]
