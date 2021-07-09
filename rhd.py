@@ -3,7 +3,7 @@ import torch
 import openpifpaf
 
 from openpifpaf.plugins.coco import CocoDataset as Coco
-#from .wholebody_metric import WholebodyMetric
+from .auc_metric import AUC
 from .constants import (
     FREIHAND_SKELETON, FREIHAND_POSE, FREIHAND_SCORE_WEIGHTS, FREIHAND_KPS, FREIHAND_SIGMAS,
     FREIHAND_CATEGORIES, HFLIP
@@ -35,7 +35,7 @@ class RHD(openpifpaf.datasets.DataModule):
     train_only_cif = False
 
     eval_annotation_filter = True
-    eval_long_edge = 641
+    eval_long_edge = 321
     eval_orientation_invariant = 0.0
     eval_extended_scale = False
 
@@ -294,4 +294,6 @@ class RHD(openpifpaf.datasets.DataModule):
             max_per_image=20,
             category_ids=[1],
             iou_type='keypoints',
-        )]
+            keypoint_oks_sigmas=FREIHAND_SIGMAS
+        ),
+            AUC()]
