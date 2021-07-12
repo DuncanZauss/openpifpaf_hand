@@ -8,6 +8,6 @@ def register():
     openpifpaf.DATAMODULES['freihand'] = Freihand
     openpifpaf.DATAMODULES['rhd'] = RHD
     openpifpaf.DECODERS.add(CifOnly)
-#    openpifpaf.CHECKPOINT_URLS['shufflenetv2k16-wholebody'] = 'http://github.com/DuncanZauss/' \
-#        'openpifpaf_assets/releases/download/v0.1.0/wb_shufflenet16_mixed_foot.pkl.epoch550'
+    openpifpaf.CHECKPOINT_URLS['shufflenetv2k16-hand'] = 'https://github.com/DuncanZauss/' \
+        'openpifpaf_assets/releases/download/v0.1.0/freihand_wholebody_sk16.pkl.epoch600'
    
