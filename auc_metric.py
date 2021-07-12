@@ -26,13 +26,19 @@ class AUC(Base):
         self.EvalClass = EvalUtil(num_kp=42)
     def accumulate(self, predictions, image_meta, *, ground_truth = None):
         for annotation in ground_truth:
-            conf = -1.0
-            best_pred = np.zeros((self.EvalClass.num_kp, 2))
+            l_conf = -1.0
+            l_best_pred = np.zeros((int(self.EvalClass.num_kp/2), 2))
+            r_conf = -1.0
+            r_best_pred = np.zeros((int(self.EvalClass.num_kp/2), 2))
             for prediction in predictions:
-                if conf<np.mean(prediction.data[:,2]):
-                    conf = np.mean(prediction.data[:,2])
-                    best_pred = prediction.data[:,:2]
-            self.EvalClass.feed(annotation.data[:,:2], annotation.data[:,2], best_pred)
+                if l_conf<np.mean(prediction.data[:int(self.EvalClass.num_kp/2),2]):
+                    l_conf = np.mean(prediction.data[:int(self.EvalClass.num_kp/2),2])
+                    l_best_pred = prediction.data[:int(self.EvalClass.num_kp/2),:2]
+                if r_conf<np.mean(prediction.data[int(self.EvalClass.num_kp/2):,2]):
+                    r_conf = np.mean(prediction.data[int(self.EvalClass.num_kp/2):,2])
+                    r_best_pred = prediction.data[int(self.EvalClass.num_kp/2):,:2]
+            final_best_pred = np.concatenate((l_best_pred, r_best_pred))
+            self.EvalClass.feed(annotation.data[:,:2], annotation.data[:,2], final_best_pred)
                 
     def stats(self):
         epe_mean, epe_median, auc, _, _ = self.EvalClass.get_measures(val_min=0.0, val_max=30.0, steps=20)
