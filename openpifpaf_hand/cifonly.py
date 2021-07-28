@@ -30,7 +30,8 @@ class CifOnly(Decoder):
                  *,
                  cif_visualizers=None):
         super().__init__()
-
+        
+        self.downsample_factor = int(cif_metas[0].base_stride / cif_metas[0].upsample_stride)
         self.cif_metas = cif_metas
         self.keypoints = cif_metas[0].keypoints
         self.score_weights = cif_metas[0].score_weights
@@ -59,9 +60,6 @@ class CifOnly(Decoder):
         group.add_argument('--cifonly-without-highres',
                            default=False, action='store_true',
                            help="Create highres confidence maps and search for maxima in those")
-        group.add_argument('--cifonly-downsample-factor', type=float,
-                           default=cls.downsample_factor,
-                           help='Ratio of the image to the output feature map size.')
         
         
     @classmethod
@@ -72,7 +70,6 @@ class CifOnly(Decoder):
             LOG.warn("Force complete pose is not recommended for the CifOnly decoder, " \
                      "it will force a prediction for any given image")
             cls.keypoint_threshold = 0.0
-        cls.downsample_factor = args.cifonly_downsample_factor
         cls.without_highres = args.cifonly_without_highres
                  
     @classmethod
