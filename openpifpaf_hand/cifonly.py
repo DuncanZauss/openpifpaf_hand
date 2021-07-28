@@ -103,10 +103,10 @@ class CifOnly(Decoder):
             cif_fields = fields[0]
             for f in range(cif_fields.shape[0]):
                 kp_f = cif_fields[f , :, :]
-                ind_i, ind_j = np.unravel_index(kp_f[1, :, :].argmax(), kp_f[1, :, :].shape)
-                v = np.max(kp_f[1, :, :])
-                x = kp_f[2, ind_i, ind_j] * self.downsample_factor  # TODO replace by stride/upsample 
-                y = kp_f[3, ind_i, ind_j] * self.downsample_factor
+                ind_i, ind_j = np.unravel_index(kp_f[0, :, :].argmax(), kp_f[0, :, :].shape)
+                v = np.max(kp_f[0, :, :])
+                x = kp_f[1, ind_i, ind_j] * self.downsample_factor  # TODO replace by stride/upsample 
+                y = kp_f[2, ind_i, ind_j] * self.downsample_factor
                 if v > self.keypoint_threshold:
                      ann.add(f, (x, y, v))
         annotations = [ann]
