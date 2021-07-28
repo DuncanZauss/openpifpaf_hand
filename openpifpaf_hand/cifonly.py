@@ -57,7 +57,7 @@ class CifOnly(Decoder):
         group.add_argument('--cifonly-keypoint-threshold', type=float,
                            default=cls.keypoint_threshold,
                            help='filter keypoints by score')
-        group.add_argument('--cifonly-without-highres',
+        group.add_argument('--cifonly-with-highres',
                            default=False, action='store_true',
                            help="Create highres confidence maps and search for maxima in those")
         
@@ -70,7 +70,7 @@ class CifOnly(Decoder):
             LOG.warn("Force complete pose is not recommended for the CifOnly decoder, " \
                      "it will force a prediction for any given image")
             cls.keypoint_threshold = 0.0
-        cls.without_highres = args.cifonly_without_highres
+        cls.with_highres = args.cifonly_with_highres
                  
     @classmethod
     def factory(cls, head_metas):
@@ -87,7 +87,7 @@ class CifOnly(Decoder):
         ann = Annotation(self.keypoints,
                           self.out_skeleton,
                           score_weights=self.score_weights)
-        if not self.without_highres:
+        if self.with_highres:
             # Slower decoder with proper high resolution maps
             cifhr = utils.CifHr().fill(fields, self.cif_metas)
             for f, hr_map in enumerate(cifhr.accumulated):
