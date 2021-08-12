@@ -10,4 +10,6 @@ def register():
     openpifpaf.DECODERS.add(CifOnly)
     openpifpaf.CHECKPOINT_URLS['shufflenetv2k16-hand'] = 'https://github.com/DuncanZauss/' \
         'openpifpaf_assets/releases/download/v0.1.0/rhd_freihand_sk16.pkl.epoch600'
+    openpifpaf.CHECKPOINT_URLS['shufflenetv2k16-wb-hand'] = 'https://github.com/DuncanZauss/' \
+        'openpifpaf_assets/releases/download/v0.1.0/freihand_wholebody_sk16.pkl.epoch600'
    
